@@ -53,9 +53,13 @@ def merge(ctx, files, driver):
             for fname in reversed(files):
                 with rasterio.open(fname) as src:
                     data = src.read()
-                    np.copyto(dest, data,
-                        where=np.logical_and(
-                        dest==nodataval, data.mask==False))
+                    
+                    if hasattr(data, "mask"):
+                        np.copyto(dest, data,
+                            where=np.logical_and(
+                            dest==nodataval, data.mask==False))
+                    else:
+                        np.copyto(dest, data)
 
             if dst.mode == 'r+':
                 data = dst.read()
