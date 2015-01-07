@@ -46,8 +46,9 @@ def merge(ctx, files, driver):
                 kwargs['driver'] == driver
                 dst = rasterio.open(output, 'w', **kwargs)
                 nodataval = first.nodatavals[0]
-
-            dest.fill(nodataval)
+            
+            if nodataval:
+                dest.fill(nodataval)
 
             for fname in reversed(files):
                 with rasterio.open(fname) as src:
