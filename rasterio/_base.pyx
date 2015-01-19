@@ -32,7 +32,7 @@ else:
 
 cdef class DatasetReader(object):
 
-    def __init__(self, path):
+    def __init__(self, path, driver=None):
         self.name = path
         self.mode = 'r'
         self._hds = NULL
@@ -45,6 +45,7 @@ cdef class DatasetReader(object):
         self._crs_wkt = None
         self._read = False
         self.env = None
+        self.driver = driver
     
     def __repr__(self):
         return "<%s RasterReader name='%s' mode='%s'>" % (
@@ -62,7 +63,10 @@ cdef class DatasetReader(object):
             self.env = GDALEnv(False)
         self.env.start()
 
-        name_b = self.name.encode('utf-8')
+        name = self.name
+        if self.driver:
+            name = "%s:%s" % (self.driver, name)
+        name_b = name.encode('utf-8')
         cdef const char *fname = name_b
         with cpl_errs:
             self._hds = _gdal.GDALOpen(fname, 0)
@@ -71,9 +75,12 @@ cdef class DatasetReader(object):
 
         cdef void *drv
         cdef const char *drv_name
+
         drv = _gdal.GDALGetDatasetDriver(self._hds)
         drv_name = _gdal.GDALGetDriverShortName(drv)
         self.driver = drv_name.decode('utf-8')
+
+        print "RASTER DRIVER: %s" % self.driver
 
         self._count = _gdal.GDALGetRasterCount(self._hds)
         self.width = _gdal.GDALGetRasterXSize(self._hds)

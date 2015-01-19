@@ -1,0 +1,7 @@
+rasterio/*.pyc
+rasterio/*.c
+rasterio/*.cpp
+rasterio/*.so
+VERSION.txt
+gdal-config.txt
+rasterio.egg-info/
