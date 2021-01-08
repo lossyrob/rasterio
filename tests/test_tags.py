@@ -7,6 +7,32 @@ import rasterio
 
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
+def test_tags_reads_what_gdal_can():
+    import os
+    from tempfile import TemporaryDirectory
+    from urllib.request import urlretrieve
+
+    # Note: GDAL python bindings must be installed in the virtualenv, e.g.
+    # pip install GDAL==`gdal-config --version`
+    from osgeo import gdal
+
+    # HLS COG file from AI for Earth datasets
+    url = 'https://hlssa.blob.core.windows.net/hls/S30/HLS.S30.T10SEG.2019048.v1.4_01.tif'
+
+    with TemporaryDirectory() as tmp_dir:
+        test_path = os.path.join(tmp_dir, 'test.tif')
+        urlretrieve(url, test_path)
+
+        # Show tags can be read with GDAL
+        gdal_ds = gdal.Open(test_path)
+        gdal_tags = gdal_ds.GetMetadata_Dict()
+
+        # Can tags be read in by rasterio?
+        with rasterio.open(test_path) as ds:
+            rio_tags = ds.tags()
+
+        # Notice error thrown: UnicodeDecodeError
+
 def test_tags_read():
     with rasterio.open('tests/data/RGB.byte.tif') as src:
         assert src.tags() == {'AREA_OR_POINT': 'Area'}
